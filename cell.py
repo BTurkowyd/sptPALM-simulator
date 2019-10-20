@@ -6,13 +6,15 @@ from particle import Particle
 
 class CellShape:
     ident = 1
-    def __init__(self, length, height, origin = [0,0], angle = 0, generate_movie = False):
+    def __init__(self, length, height, origin = [0,0], angle = 0, generate_movie = False, transition_matrix = {}, emission_matrix = {}):
         # In general initializer generates a shape of the cell
         self.length = length
         self.height = height
         self.origin = [origin[0]+length/2, origin[1]+height/2]
         self.angle = angle
         self.id = CellShape.ident
+        self.transition_matrix = transition_matrix
+        self.emission_matrix = emission_matrix
         CellShape.ident += 1
         CellShape.generate_movie = generate_movie
 
@@ -64,9 +66,4 @@ class CellShape:
 
         Particle.cell = self
 
-        self.trajs = []
-
-        for f,n in zip(fractions, no_of_trajectories):
-            self.trajectories = [Particle(i, K_BLEACH, K_DARK, K_REC, self.length, self.height, FRAMES, f, self.origin, self.angle, CellShape.generate_movie) for i in lifetime(K_BLEACH, n)]
-
-            self.trajs.append(self.trajectories)
+        self.trajectories = [Particle(i, K_BLEACH, K_DARK, K_REC, self.length, self.height, FRAMES, fractions, self.origin, self.angle, CellShape.generate_movie, self.transition_matrix, self.emission_matrix) for i in lifetime(K_BLEACH, no_of_trajectories)]

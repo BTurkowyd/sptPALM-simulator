@@ -14,20 +14,30 @@ TAU = 0.013
 FRAMES = 2000
 LENGTH = 4000
 HEIGHT = 800
-fractions = [[50,80], [200,150], [350,250]]
-no_of_trajectories = [10, 0, 20]
+fractions = [[50,60], [350,250]]
+no_of_trajectories = 25
+
+trans_matrix = {
+    'static': {'static': 0.99, 'mobile': 0.01},
+    'mobile': {'static': 0.2, 'mobile': 0.8}
+}
+
+emission_matrix = {
+    'static': {'static': 1, 'mobile': 0},
+    'mobile': {'static': 0, 'mobile': 1}
+}
 
 generate_movie = False
 
 PIXEL_SIZE = 129
-ARRAY_DIMS = 400
+ARRAY_DIMS = 300
 
-no_of_cells = 20
+no_of_cells = 25
 
 length = np.random.lognormal(np.log(LENGTH), np.log(LENGTH)*0.03, no_of_cells)
 height = np.random.normal(HEIGHT, HEIGHT*0.1, no_of_cells)
 angle = np.random.uniform(0, np.pi, no_of_cells)
-origin_x, origin_y = np.random.uniform(10**2, PIXEL_SIZE*ARRAY_DIMS/4, no_of_cells), np.random.uniform(10**4, PIXEL_SIZE*ARRAY_DIMS/4, no_of_cells)
+origin_x, origin_y = np.random.uniform(5*10**3, PIXEL_SIZE*ARRAY_DIMS/3, no_of_cells), np.random.uniform(5*10**3, PIXEL_SIZE*ARRAY_DIMS/3, no_of_cells)
 
 shuffle(length)
 shuffle(height)
@@ -38,7 +48,7 @@ shuffle(origin_y)
 cells = []
 
 for i in range(no_of_cells):
-    cell = CellShape(length[i], height[i], origin=[origin_x[i], origin_y[i]], angle=angle[i], generate_movie=generate_movie)
+    cell = CellShape(length[i], height[i], origin=[origin_x[i], origin_y[i]], angle=angle[i], generate_movie=generate_movie, transition_matrix=trans_matrix, emission_matrix=emission_matrix)
     cell.generate_particles(K_BLEACH, K_DARK, K_REC, FRAMES, fractions, no_of_trajectories)
 
     cells.append(cell)
@@ -52,8 +62,7 @@ displacements = []
 localizations = []
 
 for c in cells:
-    for i in c.trajs:
-        for part in i:
+    for part in c.trajectories:
             for l in part.bright_localizations:
                 x.append(np.round(l.x, 1))
                 y.append(np.round(l.y, 1))
@@ -103,18 +112,18 @@ if generate_movie:
         frame_x = [item for sublist in frame_x for item in sublist]
         frame_y = [item for sublist in frame_y for item in sublist]
 
-        hist = np.histogram2d(frame_x, frame_y, bins=NO_OF_PIXELS, range=[[0,NO_OF_PIXELS*PIXEL_SIZE],[0,NO_OF_PIXELS*PIXEL_SIZE]])
+        hist = np.histogram2d(frame_y, frame_x, bins=NO_OF_PIXELS, range=[[0,NO_OF_PIXELS*PIXEL_SIZE],[0,NO_OF_PIXELS*PIXEL_SIZE]])
 
         movie_array[i] = hist[0] + noise[i]
 
     tifffile.imsave('test.tiff', movie_array)
 
-df = pd.DataFrame(columns=['x','y','t','id'])
+# df = pd.DataFrame(columns=['x','y','t','id'])
 
-for c in cells:
-    for t in c.trajs:
-        for p in t:
-            p.groundtruth_trajectory()
-            df = df.append(p.groundtruth)
+# for c in cells:
+#     for t in c.trajectories:
+#         for p in t:
+#             p.groundtruth_trajectory()
+#             df = df.append(p.groundtruth)
 
-df.to_csv("groundtruth.csv", index=False)
+# df.to_csv("groundtruth.csv", index=False)

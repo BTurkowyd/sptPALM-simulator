@@ -1,5 +1,6 @@
 from methods import *
 from localization import Localization
+from markovchain import MarkovChain
 import numpy as np
 import pandas as pd
 
@@ -8,12 +9,18 @@ class Particle:
     ident = 0
     cell = None
 
-    def __init__(self, lifetime, K_BLEACH, K_DARK, K_REC, LENGTH, HEIGHT, FRAMES, fraction, cell_origin, cell_angle, generate_movie=False):
+    def __init__(self, lifetime, K_BLEACH, K_DARK, K_REC, LENGTH, HEIGHT, FRAMES, fraction, cell_origin, cell_angle, generate_movie=False, transition_matrix = {}, emission_matrix = {}):
         self.lifetime = lifetime
         self.K_BLEACH = K_BLEACH
         self.K_DARK = K_DARK
         self.K_REC = K_REC
         self.cell_origin = cell_origin
+        self.transition_matrix = transition_matrix
+        self.emission_matrix = emission_matrix
+
+        self.markov_chain = MarkovChain(self.transition_matrix, self.emission_matrix)
+        self.initial_mobility = 'mobile'
+        self.current_mobility = self.initial_mobility
 
         self.init_bool = False
 
@@ -27,8 +34,10 @@ class Particle:
 
             self.init_bool = Particle.cell.path.contains_point((self.init_x, self.init_y))
 
-        self.localizations = [Localization(self.init_x + self.cell_origin[0], self.init_y + self.cell_origin[1], self.init_t, np.random.lognormal(np.log(3000), np.log(3000)*0.2, 1), 1, 0, generate_movie=generate_movie)]
-        self.bright_localizations = [Localization(self.init_x + self.cell_origin[0], self.init_y + self.cell_origin[1], self.init_t, np.random.lognormal(np.log(500), np.log(500)*0.2, 1), 1, 0, generate_movie=generate_movie)]
+        self.localizations = [Localization(self.init_x + self.cell_origin[0], self.init_y + self.cell_origin[1], self.init_t, np.random.lognormal(np.log(2000), np.log(2000)*0.1, 1), 1, 0, generate_movie=generate_movie)]
+
+        self.bright_localizations = [Localization(self.init_x + self.cell_origin[0], self.init_y + self.cell_origin[1], self.init_t, np.random.lognormal(np.log(2000), np.log(2000)*0.1, 1), 1, 0, generate_movie=generate_movie)]
+
         self.dark_localizations = []
         self.id = Particle.ident
         Particle.ident += 1
@@ -39,7 +48,11 @@ class Particle:
             last_y = self.localizations[-1].y
             last_t = self.localizations[-1].t
             last_state = self.localizations[-1].state
-            r = displacements(fraction[0], fraction[1])
+
+            if self.current_mobility == 'static':
+                r = displacements(fraction[0][0], fraction[0][1])
+            else:
+                r = displacements(fraction[1][0], fraction[1][1])
 
             self.inside = False
 
@@ -58,7 +71,7 @@ class Particle:
                 
                 # If not...
                 if blinking == 0:
-                    new_loc = Localization(last_x+jump[0][0], last_y+jump[1][0], last_t+1, np.random.lognormal(np.log(3000), np.log(3000)*0.2, 1), 1, r, directions, generate_movie=generate_movie)
+                    new_loc = Localization(last_x+jump[0][0], last_y+jump[1][0], last_t+1, np.random.lognormal(np.log(2000), np.log(2000)*0.1, 1), 1, r, directions, generate_movie=generate_movie)
 
                     self.localizations.append(new_loc)
                     self.bright_localizations.append(new_loc)
@@ -71,6 +84,8 @@ class Particle:
 
                     self.localizations.append(new_loc)
                     self.dark_localizations.append(new_loc)
+
+                self.current_mobility = self.markov_chain.next_state(self.current_mobility)[0]
             
             # If in the previous frame localization was in the "of" state...
             else:
@@ -80,7 +95,7 @@ class Particle:
 
                 # If yes...
                 if recov == 1:
-                    new_loc = Localization(last_x+jump[0][0], last_y+jump[1][0], last_t+1, np.random.lognormal(np.log(3000), np.log(3000)*0.2, 1), 1, r, directions, generate_movie=generate_movie)
+                    new_loc = Localization(last_x+jump[0][0], last_y+jump[1][0], last_t+1, np.random.lognormal(np.log(2000), np.log(2000)*0.1, 1), 1, r, directions, generate_movie=generate_movie)
 
                     self.localizations.append(new_loc)
                     self.bright_localizations.append(new_loc)
@@ -92,7 +107,9 @@ class Particle:
                     new_loc = Localization(last_x+jump[0][0], last_y+jump[1][0], last_t+1, 0, 0)
 
                     self.localizations.append(new_loc)
-                    self.dark_localizations.append(new_loc) 
+                    self.dark_localizations.append(new_loc)
+
+                self.current_mobility = self.markov_chain.next_state(self.current_mobility)[0]
 
     def groundtruth_trajectory(self):
         # Generates a dictionary with groundtruth trajectories. Useful to compare with the tracking software result
