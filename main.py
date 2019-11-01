@@ -11,14 +11,14 @@ K_BLEACH = 0.07
 K_DARK = 0.3
 K_REC = 0.4
 TAU = 0.013
-FRAMES = 2000
+FRAMES = 3000
 LENGTH = 4000
 HEIGHT = 800
-fractions = [[50,60], [350,250]]
-no_of_trajectories = 25
+fractions = [[0,25], [360,250]]
+no_of_trajectories = 15
 
 trans_matrix = {
-    'static': {'static': 0.99, 'mobile': 0.01},
+    'static': {'static': 0.2, 'mobile': 0.8},
     'mobile': {'static': 0.2, 'mobile': 0.8}
 }
 
@@ -27,17 +27,16 @@ emission_matrix = {
     'mobile': {'static': 0, 'mobile': 1}
 }
 
-generate_movie = False
+generate_movie = True
 
 PIXEL_SIZE = 129
-ARRAY_DIMS = 300
 
 no_of_cells = 25
 
 length = np.random.lognormal(np.log(LENGTH), np.log(LENGTH)*0.03, no_of_cells)
 height = np.random.normal(HEIGHT, HEIGHT*0.1, no_of_cells)
 angle = np.random.uniform(0, np.pi, no_of_cells)
-origin_x, origin_y = np.random.uniform(5*10**3, PIXEL_SIZE*ARRAY_DIMS/3, no_of_cells), np.random.uniform(5*10**3, PIXEL_SIZE*ARRAY_DIMS/3, no_of_cells)
+origin_x, origin_y = np.random.uniform(0, 10000, no_of_cells), np.random.uniform(0, 10000, no_of_cells)
 
 shuffle(length)
 shuffle(height)
@@ -70,16 +69,33 @@ for c in cells:
                 intensity.append(np.round(l.intensity, 1))
                 localizations.append(l)
 
+
+min_x = np.min(x)
+min_y = np.min(y)
+
+x = x - min_x + PIXEL_SIZE*10
+y = y - min_y + PIXEL_SIZE*10
+
+for l in localizations:
+    l.PSF[0] = l.PSF[0] - min_x + PIXEL_SIZE*10
+    l.PSF[1] = l.PSF[1] - min_y + PIXEL_SIZE*10
+
+
+
+
+max_x = np.max(x)
+max_y = np.max(y)
+
+if max_x > max_y:
+    max_y = max_x
+else:
+    max_x = max_y
+
 rapidstorm_array = np.column_stack((x,y,t,intensity))
 
 rapidstorm_array = rapidstorm_array[rapidstorm_array[:,2].argsort()]
 
-min_x = min_y = 0
 
-if np.max(x) > np.max(y):
-    max_x = max_y = np.max(x) + PIXEL_SIZE*10
-else:
-    max_x = max_y = np.max(y) + PIXEL_SIZE*10
 
 trajs = []
 
@@ -93,7 +109,7 @@ with open("localizations.txt", "w") as file:
 
 
 if generate_movie:
-    NO_OF_PIXELS = int(np.ceil(max_x/PIXEL_SIZE))
+    NO_OF_PIXELS = int(np.ceil(max_x/PIXEL_SIZE)) + 20
     movie_array = np.zeros((np.max(t)+1, NO_OF_PIXELS, NO_OF_PIXELS), dtype=np.int16)
     noise = np.random.randint(400, 600, (np.max(t)+1, NO_OF_PIXELS, NO_OF_PIXELS), dtype=np.int16)
 

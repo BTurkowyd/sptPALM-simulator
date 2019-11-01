@@ -30,7 +30,7 @@ def rotate(origin, point, angle):
     qy = oy + np.sin(angle) * (px - ox) + np.cos(angle) * (py - oy)
     return qx, qy
 
-def gauss2d(intensity, center_x, center_y, PSF_FWHM_X=150, PSF_FWHM_Y=150, orientation = 0):
+def gauss2d(intensity, center_x, center_y, PSF_FWHM_X=200, PSF_FWHM_Y=200, orientation = 0):
     mean = [center_x, center_y]
     covariance =[[PSF_FWHM_X**2, 0],[0, PSF_FWHM_Y**2]]
     x,y = np.random.multivariate_normal(mean, covariance, int(intensity)).T
