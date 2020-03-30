@@ -3,6 +3,7 @@ import pandas as pd
 from particle import Particle
 from cell import CellShape
 from methods import *
+from camera_setup import *
 import matplotlib.pyplot as plt
 from random import shuffle
 import tifffile
@@ -11,14 +12,14 @@ K_BLEACH = 0.07
 K_DARK = 0.3
 K_REC = 0.4
 TAU = 0.013
-FRAMES = 3000
+FRAMES = 1000
 LENGTH = 4000
 HEIGHT = 800
-fractions = [[0,25], [360,250]]
+fractions = [[50,25], [360,150]]
 no_of_trajectories = 15
 
 trans_matrix = {
-    'static': {'static': 0.2, 'mobile': 0.8},
+    'static': {'static': 0.8, 'mobile': 0.2},
     'mobile': {'static': 0.2, 'mobile': 0.8}
 }
 
@@ -29,9 +30,9 @@ emission_matrix = {
 
 generate_movie = True
 
-PIXEL_SIZE = 129
+pixel_size = PIXEL_SIZE
 
-no_of_cells = 25
+no_of_cells = 15
 
 length = np.random.lognormal(np.log(LENGTH), np.log(LENGTH)*0.03, no_of_cells)
 height = np.random.normal(HEIGHT, HEIGHT*0.1, no_of_cells)
@@ -73,12 +74,12 @@ for c in cells:
 min_x = np.min(x)
 min_y = np.min(y)
 
-x = x - min_x + PIXEL_SIZE*10
-y = y - min_y + PIXEL_SIZE*10
+x = x - min_x + pixel_size*10
+y = y - min_y + pixel_size*10
 
 for l in localizations:
-    l.PSF[0] = l.PSF[0] - min_x + PIXEL_SIZE*10
-    l.PSF[1] = l.PSF[1] - min_y + PIXEL_SIZE*10
+    l.PSF[0] = l.PSF[0] - min_x + pixel_size*10
+    l.PSF[1] = l.PSF[1] - min_y + pixel_size*10
 
 
 
@@ -109,9 +110,9 @@ with open("localizations.txt", "w") as file:
 
 
 if generate_movie:
-    NO_OF_PIXELS = int(np.ceil(max_x/PIXEL_SIZE)) + 20
+    NO_OF_PIXELS = int(np.ceil(max_x/pixel_size)) + 20
     movie_array = np.zeros((np.max(t)+1, NO_OF_PIXELS, NO_OF_PIXELS), dtype=np.int16)
-    noise = np.random.randint(400, 600, (np.max(t)+1, NO_OF_PIXELS, NO_OF_PIXELS), dtype=np.int16)
+    noise = np.random.normal(loc=dark_pixel, scale=dark_pixel*0.2, size=(np.max(t)+1, NO_OF_PIXELS, NO_OF_PIXELS))
 
     for i in range(np.max(t)+1):
         if not i%20:
@@ -128,7 +129,7 @@ if generate_movie:
         frame_x = [item for sublist in frame_x for item in sublist]
         frame_y = [item for sublist in frame_y for item in sublist]
 
-        hist = np.histogram2d(frame_y, frame_x, bins=NO_OF_PIXELS, range=[[0,NO_OF_PIXELS*PIXEL_SIZE],[0,NO_OF_PIXELS*PIXEL_SIZE]])
+        hist = np.histogram2d(frame_y, frame_x, bins=NO_OF_PIXELS, range=[[0,NO_OF_PIXELS*pixel_size],[0,NO_OF_PIXELS*pixel_size]])
 
         movie_array[i] = hist[0] + noise[i]
 

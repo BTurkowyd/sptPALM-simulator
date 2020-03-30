@@ -1,4 +1,5 @@
 from methods import *
+from camera_setup import *
 from localization import Localization
 from markovchain import MarkovChain
 import numpy as np
@@ -34,9 +35,9 @@ class Particle:
 
             self.init_bool = Particle.cell.path.contains_point((self.init_x, self.init_y))
 
-        self.localizations = [Localization(self.init_x + self.cell_origin[0], self.init_y + self.cell_origin[1], self.init_t, np.random.lognormal(np.log(3000), np.log(3000)*0.1, 1), 1, 0, generate_movie=generate_movie)]
+        self.localizations = [Localization(self.init_x + self.cell_origin[0], self.init_y + self.cell_origin[1], self.init_t, np.random.normal(300*AD_factor, 300*AD_factor*0.1, 1), 1, 0, generate_movie=generate_movie)]
 
-        self.bright_localizations = [Localization(self.init_x + self.cell_origin[0], self.init_y + self.cell_origin[1], self.init_t, np.random.lognormal(np.log(3000), np.log(3000)*0.1, 1), 1, 0, generate_movie=generate_movie)]
+        self.bright_localizations = [Localization(self.init_x + self.cell_origin[0], self.init_y + self.cell_origin[1], self.init_t, np.random.normal(300*AD_factor, 300*AD_factor*0.1, 1), 1, 0, generate_movie=generate_movie)]
 
         self.dark_localizations = []
         self.id = Particle.ident
@@ -71,7 +72,7 @@ class Particle:
                 
                 # If not...
                 if blinking == 0:
-                    new_loc = Localization(last_x+jump[0][0], last_y+jump[1][0], last_t+1, np.random.lognormal(np.log(3000), np.log(3000)*0.1, 1), 1, r, directions, generate_movie=generate_movie)
+                    new_loc = Localization(last_x+jump[0][0], last_y+jump[1][0], last_t+1, np.random.normal(300*AD_factor, 300*AD_factor*0.1, 1), 1, r, directions, generate_movie=generate_movie)
 
                     self.localizations.append(new_loc)
                     self.bright_localizations.append(new_loc)
@@ -95,7 +96,7 @@ class Particle:
 
                 # If yes...
                 if recov == 1:
-                    new_loc = Localization(last_x+jump[0][0], last_y+jump[1][0], last_t+1, np.random.lognormal(np.log(3000), np.log(3000)*0.1, 1), 1, r, directions, generate_movie=generate_movie)
+                    new_loc = Localization(last_x+jump[0][0], last_y+jump[1][0], last_t+1, np.random.normal(300*AD_factor, 300*AD_factor*0.1, 1), 1, r, directions, generate_movie=generate_movie)
 
                     self.localizations.append(new_loc)
                     self.bright_localizations.append(new_loc)
