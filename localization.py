@@ -12,4 +12,4 @@ class Localization:
         self.PSF_FWHM = PSF_FWHM
 
         if generate_movie:
-            self.PSF = gauss2d(self.intensity, self.x, self.y)
+            self.PSF = gauss2d(self.intensity, self.x, self.y, self.PSF_FWHM, self.PSF_FWHM)

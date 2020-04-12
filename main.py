@@ -16,11 +16,11 @@ FRAMES = 1000
 LENGTH = 4000
 HEIGHT = 800
 fractions = [[50,25], [360,150]]
-no_of_trajectories = 15
+no_of_trajectories = 5
 
 trans_matrix = {
-    'static': {'static': 0.8, 'mobile': 0.2},
-    'mobile': {'static': 0.2, 'mobile': 0.8}
+    'static': {'static': 0, 'mobile': 1.0},
+    'mobile': {'static': 0, 'mobile': 1.0}
 }
 
 emission_matrix = {
@@ -32,7 +32,7 @@ generate_movie = True
 
 pixel_size = PIXEL_SIZE
 
-no_of_cells = 15
+no_of_cells = 10
 
 length = np.random.lognormal(np.log(LENGTH), np.log(LENGTH)*0.03, no_of_cells)
 height = np.random.normal(HEIGHT, HEIGHT*0.1, no_of_cells)
@@ -112,7 +112,7 @@ with open("localizations.txt", "w") as file:
 if generate_movie:
     NO_OF_PIXELS = int(np.ceil(max_x/pixel_size)) + 20
     movie_array = np.zeros((np.max(t)+1, NO_OF_PIXELS, NO_OF_PIXELS), dtype=np.int16)
-    noise = np.random.normal(loc=dark_pixel, scale=dark_pixel*0.2, size=(np.max(t)+1, NO_OF_PIXELS, NO_OF_PIXELS))
+    noise = np.random.poisson(lam=dark_pixel, size=(np.max(t)+1, NO_OF_PIXELS, NO_OF_PIXELS))
 
     for i in range(np.max(t)+1):
         if not i%20:

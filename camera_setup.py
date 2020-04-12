@@ -1,3 +1,5 @@
+# Camera settings
+
 PIXEL_SIZE = 129
 ELECTRON_PER_AD_COUNT = 5.48
 QE = 0.9
@@ -6,3 +8,10 @@ EM_GAIN = 300
 
 AD_factor = int(QE*EM_GAIN/ELECTRON_PER_AD_COUNT)
 dark_pixel = BASE_LEVEL_AD_COUNTS*ELECTRON_PER_AD_COUNT
+
+
+# Fluorophore settings
+
+PSF_SIGMA = 200
+PSF_SIGMA_STD = 50
+PHOTONS_PER_EVENT = 300
