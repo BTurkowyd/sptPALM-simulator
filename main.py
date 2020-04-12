@@ -8,31 +8,16 @@ import matplotlib.pyplot as plt
 from random import shuffle
 import tifffile
 
-K_BLEACH = 0.07
-K_DARK = 0.3
-K_REC = 0.4
-TAU = 0.013
-FRAMES = 1000
-LENGTH = 4000
-HEIGHT = 800
-fractions = [[50,25], [360,150]]
-no_of_trajectories = 5
 
 trans_matrix = {
-    'static': {'static': 0, 'mobile': 1.0},
-    'mobile': {'static': 0, 'mobile': 1.0}
+    'static': {'static': 1.0, 'mobile': 0.0},
+    'mobile': {'static': 1.0, 'mobile': 0.0}
 }
 
 emission_matrix = {
     'static': {'static': 1, 'mobile': 0},
     'mobile': {'static': 0, 'mobile': 1}
 }
-
-generate_movie = True
-
-pixel_size = PIXEL_SIZE
-
-no_of_cells = 10
 
 length = np.random.lognormal(np.log(LENGTH), np.log(LENGTH)*0.03, no_of_cells)
 height = np.random.normal(HEIGHT, HEIGHT*0.1, no_of_cells)
@@ -74,23 +59,21 @@ for c in cells:
 min_x = np.min(x)
 min_y = np.min(y)
 
-x = x - min_x + pixel_size*10
-y = y - min_y + pixel_size*10
+x = x - min_x + PIXEL_SIZE*10
+y = y - min_y + PIXEL_SIZE*10
 
 for l in localizations:
-    l.PSF[0] = l.PSF[0] - min_x + pixel_size*10
-    l.PSF[1] = l.PSF[1] - min_y + pixel_size*10
-
-
+    l.PSF[0] = l.PSF[0] - min_x + PIXEL_SIZE*10
+    l.PSF[1] = l.PSF[1] - min_y + PIXEL_SIZE*10
 
 
 max_x = np.max(x)
 max_y = np.max(y)
 
-if max_x > max_y:
-    max_y = max_x
-else:
-    max_x = max_y
+# if max_x > max_y:
+#     max_y = max_x
+# else:
+#     max_x = max_y
 
 rapidstorm_array = np.column_stack((x,y,t,intensity))
 
@@ -110,9 +93,10 @@ with open("localizations.txt", "w") as file:
 
 
 if generate_movie:
-    NO_OF_PIXELS = int(np.ceil(max_x/pixel_size)) + 20
-    movie_array = np.zeros((np.max(t)+1, NO_OF_PIXELS, NO_OF_PIXELS), dtype=np.int16)
-    noise = np.random.poisson(lam=dark_pixel, size=(np.max(t)+1, NO_OF_PIXELS, NO_OF_PIXELS))
+    NO_OF_PIXELS_X = int(np.ceil(max_x/PIXEL_SIZE)) + 20
+    NO_OF_PIXELS_Y = int(np.ceil(max_y/PIXEL_SIZE)) + 20
+    movie_array = np.zeros((np.max(t)+1, NO_OF_PIXELS_X, NO_OF_PIXELS_Y), dtype=np.int16)
+    noise = np.random.poisson(lam=dark_pixel, size=(np.max(t)+1, NO_OF_PIXELS_X, NO_OF_PIXELS_Y))
 
     for i in range(np.max(t)+1):
         if not i%20:
@@ -129,7 +113,7 @@ if generate_movie:
         frame_x = [item for sublist in frame_x for item in sublist]
         frame_y = [item for sublist in frame_y for item in sublist]
 
-        hist = np.histogram2d(frame_y, frame_x, bins=NO_OF_PIXELS, range=[[0,NO_OF_PIXELS*pixel_size],[0,NO_OF_PIXELS*pixel_size]])
+        hist = np.histogram2d(frame_y, frame_x, bins=[NO_OF_PIXELS_X, NO_OF_PIXELS_Y], range=[[0,NO_OF_PIXELS_X*PIXEL_SIZE],[0,NO_OF_PIXELS_Y*PIXEL_SIZE]])
 
         movie_array[i] = hist[0] + noise[i]
 

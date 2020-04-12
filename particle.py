@@ -20,7 +20,12 @@ class Particle:
         self.emission_matrix = emission_matrix
 
         self.markov_chain = MarkovChain(self.transition_matrix, self.emission_matrix)
-        self.initial_mobility = 'mobile'
+
+        if np.random.rand() > 0.5:
+            self.initial_mobility = 'mobile'
+        else:
+            self.initial_mobility = 'static'
+
         self.current_mobility = self.initial_mobility
 
         self.init_bool = False
