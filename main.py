@@ -8,17 +8,6 @@ import matplotlib.pyplot as plt
 from random import shuffle
 import tifffile
 
-
-trans_matrix = {
-    'static': {'static': 1.0, 'mobile': 0.0},
-    'mobile': {'static': 1.0, 'mobile': 0.0}
-}
-
-emission_matrix = {
-    'static': {'static': 1, 'mobile': 0},
-    'mobile': {'static': 0, 'mobile': 1}
-}
-
 length = np.random.lognormal(np.log(LENGTH), np.log(LENGTH)*0.03, no_of_cells)
 height = np.random.normal(HEIGHT, HEIGHT*0.1, no_of_cells)
 angle = np.random.uniform(0, np.pi, no_of_cells)
@@ -93,10 +82,10 @@ with open("localizations.txt", "w") as file:
 
 
 if generate_movie:
-    NO_OF_PIXELS_X = int(np.ceil(max_x/PIXEL_SIZE)) + 20
-    NO_OF_PIXELS_Y = int(np.ceil(max_y/PIXEL_SIZE)) + 20
+    NO_OF_PIXELS_Y = int(np.ceil(max_x/PIXEL_SIZE)) + 20
+    NO_OF_PIXELS_X = int(np.ceil(max_y/PIXEL_SIZE)) + 20
     movie_array = np.zeros((np.max(t)+1, NO_OF_PIXELS_X, NO_OF_PIXELS_Y), dtype=np.int16)
-    noise = np.random.poisson(lam=dark_pixel, size=(np.max(t)+1, NO_OF_PIXELS_X, NO_OF_PIXELS_Y))
+    noise = np.random.poisson(lam=BASE_LEVEL_AD_COUNTS*ELECTRON_PER_AD_COUNT, size=(np.max(t)+1, NO_OF_PIXELS_X, NO_OF_PIXELS_Y))
 
     for i in range(np.max(t)+1):
         if not i%20:
@@ -115,7 +104,7 @@ if generate_movie:
 
         hist = np.histogram2d(frame_y, frame_x, bins=[NO_OF_PIXELS_X, NO_OF_PIXELS_Y], range=[[0,NO_OF_PIXELS_X*PIXEL_SIZE],[0,NO_OF_PIXELS_Y*PIXEL_SIZE]])
 
-        movie_array[i] = hist[0] + noise[i]
+        movie_array[i] = hist[0]*(QE*EM_GAIN/ELECTRON_PER_AD_COUNT) + noise[i]
 
     tifffile.imsave('test.tiff', movie_array)
 
