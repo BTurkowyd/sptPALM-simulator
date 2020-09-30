@@ -1,4 +1,5 @@
 import numpy as np
+from camera_setup import LOC_PREC
 
 def direction(n):
     return np.random.uniform(0, np.pi*2, n)
@@ -7,8 +8,7 @@ def lifetime(rate, size):
     return np.random.geometric(rate, size)
 
 def displacements(mean, sigma, lifetime=1):
-    y = np.random.normal(mean, sigma, lifetime)
-    y = np.abs(y)
+    y = np.random.normal(mean, sigma, lifetime) + np.random.normal(0, LOC_PREC)
     return y
 
 def polarToCartesian(displacement, direction):

@@ -11,7 +11,7 @@ import tifffile
 length = np.random.lognormal(np.log(LENGTH), np.log(LENGTH)*0.03, no_of_cells)
 height = np.random.normal(HEIGHT, HEIGHT*0.1, no_of_cells)
 angle = np.random.uniform(0, np.pi, no_of_cells)
-origin_x, origin_y = np.random.uniform(0, 10000, no_of_cells), np.random.uniform(0, 10000, no_of_cells)
+origin_x, origin_y = np.random.uniform(10000, 20000, no_of_cells), np.random.uniform(10000, 20000, no_of_cells)
 
 shuffle(length)
 shuffle(height)
@@ -51,9 +51,10 @@ min_y = np.min(y)
 x = x - min_x + PIXEL_SIZE*10
 y = y - min_y + PIXEL_SIZE*10
 
-for l in localizations:
-    l.PSF[0] = l.PSF[0] - min_x + PIXEL_SIZE*10
-    l.PSF[1] = l.PSF[1] - min_y + PIXEL_SIZE*10
+if generate_movie:
+    for l in localizations:
+        l.PSF[0] = l.PSF[0] - min_x + PIXEL_SIZE*10
+        l.PSF[1] = l.PSF[1] - min_y + PIXEL_SIZE*10
 
 
 max_x = np.max(x)
@@ -108,12 +109,12 @@ if generate_movie:
 
     tifffile.imsave('test.tiff', movie_array)
 
-# df = pd.DataFrame(columns=['x','y','t','id'])
+df = pd.DataFrame(columns=['x','y','t','id'])
 
-# for c in cells:
-#     for t in c.trajectories:
-#         for p in t:
-#             p.groundtruth_trajectory()
-#             df = df.append(p.groundtruth)
+for c in cells:
+    for t in c.trajectories:
+        # for p in t:
+            t.groundtruth_trajectory()
+            df = df.append(t.groundtruth)
 
-# df.to_csv("groundtruth.csv", index=False)
+df.to_csv("groundtruth.csv", index=False)
