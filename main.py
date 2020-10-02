@@ -30,6 +30,7 @@ for i in range(no_of_cells):
 x = []
 y = []
 t = []
+ident = []
 intensity = []
 displacements = []
 
@@ -41,9 +42,9 @@ for c in cells:
                 x.append(np.round(l.x, 1))
                 y.append(np.round(l.y, 1))
                 t.append(l.t)
+                ident.append(part.id)
                 intensity.append(np.round(l.intensity, 1))
                 localizations.append(l)
-
 
 min_x = np.min(x)
 min_y = np.min(y)
@@ -66,12 +67,10 @@ max_y = np.max(y)
 #     max_x = max_y
 
 rapidstorm_array = np.column_stack((x,y,t,intensity))
-
 rapidstorm_array = rapidstorm_array[rapidstorm_array[:,2].argsort()]
 
-
-
-trajs = []
+groundtruth_array = np.column_stack((x,y,t,ident))
+groundtruth_array = groundtruth_array[groundtruth_array[:,2].argsort()]
 
 header = '# <localizations insequence="true" repetitions="variable"><field identifier="Position-0-0" syntax="floating point with . for decimals and optional scientific e-notation" semantic="position in sample space in X" unit="nanometer" min="{}" max="{} nm" /><field identifier="Position-1-0" syntax="floating point with . for decimals and optional scientific e-notation" semantic="position in sample space in Y" unit="nanometer" min="{} m" max="{} nm" /><field identifier="ImageNumber-0-0" syntax="integer" semantic="frame number" unit="frame" min="0 fr" /><field identifier="Amplitude-0-0" syntax="floating point with . for decimals and optional scientific e-notation" semantic="emission strength" unit="A/D count" /></localizations>'.format(min_x, min_y, max_x, max_y)
 
@@ -79,7 +78,13 @@ header = '# <localizations insequence="true" repetitions="variable"><field ident
 with open("localizations.txt", "w") as file:
     file.write(header + "\n")
     for r in rapidstorm_array:
-        file.write("{} {} {} {}\n".format(r[0], r[1], int(r[2]), r[3]))
+        file.write("%.1f, %.1f, %.0f, %.0f\n" % (r[0], r[1], int(r[2]), r[3]))
+
+with open("groundtruth.csv", "w") as file:
+    file.write("x,y,t,id\n")
+    for r in groundtruth_array:
+        file.write("%.1f,%.1f,%.0f,%.0f\n" % (r[0], r[1], int(r[2]), r[3]))
+
 
 
 if generate_movie:
@@ -109,12 +114,3 @@ if generate_movie:
 
     tifffile.imsave('test.tiff', movie_array)
 
-df = pd.DataFrame(columns=['x','y','t','id'])
-
-for c in cells:
-    for t in c.trajectories:
-        # for p in t:
-            t.groundtruth_trajectory()
-            df = df.append(t.groundtruth)
-
-df.to_csv("groundtruth.csv", index=False)

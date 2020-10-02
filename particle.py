@@ -56,18 +56,31 @@ class Particle:
             last_state = self.localizations[-1].state
 
             if self.current_mobility == 'static':
-                r = displacements(fraction[0][0], fraction[0][1])
+                r = displacements(fraction[0])
             else:
-                r = displacements(fraction[1][0], fraction[1][1])
+                r = displacements(fraction[1])
 
             self.inside = False
 
+            trial = 0
+
         # Check whether generates localization is within the cell
-            while self.inside == False:
+            while self.inside == False and trial < 300:
                 directions = direction(1)
                 jump = polarToCartesian(r, directions)
 
+                # Apply loc precision error
+                directions_LP = direction(1)
+                jump_LP = polarToCartesian(np.random.normal(0, LOC_PREC), directions_LP)
+                jump[0][0] += jump_LP[0][0]
+                jump[1][0] += jump_LP[1][0]
+
                 self.inside = Particle.cell.path.contains_point((last_x+jump[0][0] - self.cell_origin[0], last_y+jump[1][0] - self.cell_origin[1]))
+
+                trial += 1
+
+            if trial == 300:
+                print('The trajectory was killed!')
 
             # If in the previous frame localization was in the "on" state...
             if last_state == 1:

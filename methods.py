@@ -1,5 +1,5 @@
 import numpy as np
-from camera_setup import LOC_PREC
+from camera_setup import LOC_PREC, TAU
 
 def direction(n):
     return np.random.uniform(0, np.pi*2, n)
@@ -7,8 +7,13 @@ def direction(n):
 def lifetime(rate, size):
     return np.random.geometric(rate, size)
 
-def displacements(mean, sigma, lifetime=1):
-    y = np.random.normal(mean, sigma, lifetime) + np.random.normal(0, LOC_PREC)
+def dToJD(D, loc_prec=LOC_PREC, dt=TAU):
+    y = 2*np.sqrt(D*10**6*dt + loc_prec**2)
+    return y
+
+def displacements(diffusion, lifetime=1):
+    rayleigh_sigma = dToJD(diffusion)
+    y = np.random.rayleigh(rayleigh_sigma, lifetime)
     return y
 
 def polarToCartesian(displacement, direction):
