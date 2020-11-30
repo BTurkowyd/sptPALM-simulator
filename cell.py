@@ -1,5 +1,4 @@
 import numpy as np
-import matplotlib.pyplot as plt
 import matplotlib.path as mpltPath
 from methods import *
 from particle import Particle
@@ -12,7 +11,7 @@ class CellShape:
         self.height = height
         self.origin = [origin[0]+length/2, origin[1]+height/2]
         self.angle = angle
-        self.id = CellShape.ident
+        # self.id = CellShape.ident
         self.transition_matrix = transition_matrix
         self.emission_matrix = emission_matrix
         CellShape.ident += 1
@@ -59,7 +58,7 @@ class CellShape:
         self.polygon = [(x, y) for x, y in zip(self.shape['x'], self.shape['y'])]
         self.path = mpltPath.Path(self.polygon)
 
-        print("Cell {} created".format(self.id))
+        # print("Cell {} created".format(self.id))
 
     def generate_particles(self, K_BLEACH, K_DARK, K_REC, FRAMES, fractions, no_of_trajectories):
         # Generates particles inside the cell
