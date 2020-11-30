@@ -1,9 +1,15 @@
+from concurrent.futures import process
 import numpy as np
 from cell_multiprocess import *
 from methods import *
 from camera_setup import *
 import tifffile
 import concurrent.futures
+from multiprocessing import cpu_count, Lock, Process
+import itertools
+
+CPU_COUNT = cpu_count()
+global_lock = Lock()
 
 # length = np.random.lognormal(np.log(LENGTH), np.log(LENGTH)*0.03, no_of_cells)
 # height = np.random.normal(HEIGHT, HEIGHT*0.1, no_of_cells)
@@ -44,6 +50,25 @@ if __name__ == '__main__':
 
     localizations = []
 
+
+    # with concurrent.futures.ProcessPoolExecutor() as executor:
+    #     results = [executor.submit(to_list, c) for c in cells]
+
+    #     for f in concurrent.futures.as_completed(results):
+    #         x.append(f.result()[0])
+    #         y.append(f.result()[1])
+    #         t.append(f.result()[2])
+    #         ident.append(f.result()[3])
+    #         intensity.append(f.result()[4])
+    #         localizations.append(f.result()[5])
+
+    # x = list(itertools.chain.from_iterable(x))
+    # y = list(itertools.chain.from_iterable(y))
+    # t = list(itertools.chain.from_iterable(t))
+    # ident = list(itertools.chain.from_iterable(ident))
+    # intensity = list(itertools.chain.from_iterable(intensity))
+    # localizations = list(itertools.chain.from_iterable(localizations))
+
     for c in cells:
         for part in c.trajectories:
                 for l in part.bright_localizations:
@@ -83,17 +108,32 @@ if __name__ == '__main__':
     header = '# <localizations insequence="true" repetitions="variable"><field identifier="Position-0-0" syntax="floating point with . for decimals and optional scientific e-notation" semantic="position in sample space in X" unit="nanometer" min="{}" max="{} nm" /><field identifier="Position-1-0" syntax="floating point with . for decimals and optional scientific e-notation" semantic="position in sample space in Y" unit="nanometer" min="{} m" max="{} nm" /><field identifier="ImageNumber-0-0" syntax="integer" semantic="frame number" unit="frame" min="0 fr" /><field identifier="Amplitude-0-0" syntax="floating point with . for decimals and optional scientific e-notation" semantic="emission strength" unit="A/D count" /></localizations>'.format(min_x, min_y, max_x, max_y)
 
 
-    with open("localizations.txt", "w") as file:
-        file.write(header + "\n")
-        for r in rapidstorm_array:
-            file.write("%.1f, %.1f, %.0f, %.0f\n" % (r[0], r[1], int(r[2]), r[3]))
+    # with open("localizations.txt", "w") as file:
+    #     file.write(header + "\n")
+    #     for r in rapidstorm_array:
+    #         file.write("%.1f, %.1f, %.0f, %.0f\n" % (r[0], r[1], int(r[2]), r[3]))
 
-    with open("groundtruth.csv", "w") as file:
-        file.write("x,y,t,id\n")
-        for r in groundtruth_array:
-            file.write("%.1f,%.1f,%.0f,%.0f\n" % (r[0], r[1], int(r[2]), r[3]))
+    # with open("groundtruth.csv", "w") as file:
+    #     file.write("x,y,t,id\n")
+    #     for r in groundtruth_array:
+    #         file.write("%.1f,%.1f,%.0f,%.0f\n" % (r[0], r[1], int(r[2]), r[3]))
 
+    
+    processes_loc_file = []
+    for i in range(CPU_COUNT):
+        p = Process(target=write_to_loc_file, args=[header, rapidstorm_array])
+        processes_loc_file.append(p)
+        p.start()
+    [process.join() for process in processes_loc_file]
 
+    processes_groundtruth = []
+    for i in range(CPU_COUNT):
+        p = Process(target=write_to_groundtruth, args=[rapidstorm_array])
+        processes_groundtruth.append(p)
+        p.start()
+    [process.join() for process in processes_groundtruth]
+
+        
 
     if generate_movie:
         NO_OF_PIXELS_Y = int(np.ceil(max_x/PIXEL_SIZE)) + 20
