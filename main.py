@@ -72,12 +72,13 @@ if __name__ == '__main__':
     for c in cells:
         for part in c.trajectories:
                 for l in part.bright_localizations:
-                    x.append(np.round(l.x, 1))
-                    y.append(np.round(l.y, 1))
-                    t.append(l.t)
-                    ident.append(part.id)
-                    intensity.append(np.round(l.intensity, 1))
-                    localizations.append(l)
+                    if not (l.t % np.round(FRAMERATE/TAU)):
+                        x.append(np.round(l.x, 1))
+                        y.append(np.round(l.y, 1))
+                        t.append(l.t)
+                        ident.append(part.id)
+                        intensity.append(np.round(l.intensity, 1))
+                        localizations.append(l)
 
     min_x = np.min(x)
     min_y = np.min(y)

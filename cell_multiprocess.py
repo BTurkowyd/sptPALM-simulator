@@ -27,12 +27,13 @@ def to_list(cell):
     localizations = []
     for part in cell.trajectories:
         for l in part.bright_localizations:
-            x.append(np.round(l.x, 1))
-            y.append(np.round(l.y, 1))
-            t.append(l.t)
-            ident.append(part.id)
-            intensity.append(np.round(l.intensity, 1))
-            localizations.append(l)
+            if not (l.t % np.round(FRAMERATE/TAU)):
+                x.append(np.round(l.x, 1))
+                y.append(np.round(l.y, 1))
+                t.append(l.t)
+                ident.append(part.id)
+                intensity.append(np.round(l.intensity, 1))
+                localizations.append(l)
     return [x, y, t, ident, intensity, localizations]
 
 def write_to_loc_file(header, data):
