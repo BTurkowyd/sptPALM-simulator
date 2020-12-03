@@ -68,17 +68,18 @@ if __name__ == '__main__':
     # ident = list(itertools.chain.from_iterable(ident))
     # intensity = list(itertools.chain.from_iterable(intensity))
     # localizations = list(itertools.chain.from_iterable(localizations))
-
+    trajectory_id = 1
     for c in cells:
         for part in c.trajectories:
-                for l in part.bright_localizations:
-                    if not (l.t % np.round(FRAMERATE/TAU)):
-                        x.append(np.round(l.x, 1))
-                        y.append(np.round(l.y, 1))
-                        t.append(l.t)
-                        ident.append(part.id)
-                        intensity.append(np.round(l.intensity, 1))
-                        localizations.append(l)
+            for l in part.bright_localizations:
+                if not (l.t % np.round(FRAMERATE/TAU)):
+                    x.append(np.round(l.x, 1))
+                    y.append(np.round(l.y, 1))
+                    t.append(l.t)
+                    ident.append(trajectory_id)
+                    intensity.append(np.round(l.intensity, 1))
+                    localizations.append(l)
+            trajectory_id += 1
 
     min_x = np.min(x)
     min_y = np.min(y)
@@ -129,7 +130,7 @@ if __name__ == '__main__':
 
     processes_groundtruth = []
     for i in range(CPU_COUNT):
-        p = Process(target=write_to_groundtruth, args=[rapidstorm_array])
+        p = Process(target=write_to_groundtruth, args=[groundtruth_array])
         processes_groundtruth.append(p)
         p.start()
     [process.join() for process in processes_groundtruth]

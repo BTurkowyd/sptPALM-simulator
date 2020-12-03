@@ -38,14 +38,14 @@ def to_list(cell):
 
 def write_to_loc_file(header, data):
     with global_lock:
-        with open("localizations.txt", "w") as file:
+        with open("localizations_K_SM_{}__K_MS_{}.txt".format(str(K_SM), str(K_MS)), "w") as file:
             file.write(header + "\n")
             for r in data:
                 file.write("%.1f, %.1f, %.0f, %.0f\n" % (r[0], r[1], int(r[2]), r[3]))
 
 def write_to_groundtruth(data):
     with global_lock:
-        with open("groundtruth.csv", "w") as file:
+        with open("groundtruth_K_SM_{}__K_MS_{}.csv".format(str(K_SM), str(K_MS)), "w") as file:
             file.write("x,y,t,id\n")
             for r in data:
                 file.write("%.1f,%.1f,%.0f,%.0f\n" % (r[0], r[1], int(r[2]), r[3]))

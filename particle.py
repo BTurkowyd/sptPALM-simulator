@@ -50,10 +50,20 @@ class Particle:
 
         # Generates trajectories, including blinking, recovery and bleaching
         while self.lifetime > 0:
-            last_x = self.localizations[-1].x
-            last_y = self.localizations[-1].y
-            last_t = self.localizations[-1].t
-            last_state = self.localizations[-1].state
+            # last_x = self.localizations[-1].x
+            # last_y = self.localizations[-1].y
+            # last_t = self.localizations[-1].t
+            # last_state = self.localizations[-1].state
+            try:
+                last_x = new_loc.x
+                last_t = new_loc.t
+                last_y = new_loc.y
+                last_state = new_loc.state
+            except UnboundLocalError:
+                last_x = self.localizations[-1].x
+                last_y = self.localizations[-1].y
+                last_t = self.localizations[-1].t
+                last_state = self.localizations[-1].state
 
             if self.current_mobility == 'static':
                 r = displacements(fraction[0])
@@ -92,8 +102,9 @@ class Particle:
                 if blinking == 0:
                     new_loc = Localization(last_x+jump[0][0], last_y+jump[1][0], last_t+1, np.random.poisson(300, 1), 1, r, directions, generate_movie=generate_movie, PSF_FWHM=np.random.normal(PSF_SIGMA, PSF_SIGMA_STD, 1)[0])
 
-                    self.localizations.append(new_loc)
-                    self.bright_localizations.append(new_loc)
+                    if not (new_loc.t % np.round(FRAMERATE/TAU)):
+                        self.localizations.append(new_loc)
+                        self.bright_localizations.append(new_loc)
 
                     self.lifetime -= 1
 
@@ -101,8 +112,9 @@ class Particle:
                 else:
                     new_loc = Localization(last_x+jump[0][0], last_y+jump[1][0], last_t+1, 0, 0)
 
-                    self.localizations.append(new_loc)
-                    self.dark_localizations.append(new_loc)
+                    if not (new_loc.t % np.round(FRAMERATE/TAU)):
+                        self.localizations.append(new_loc)
+                        self.dark_localizations.append(new_loc)
 
                 self.current_mobility = self.markov_chain.next_state(self.current_mobility)[0]
             
@@ -116,8 +128,9 @@ class Particle:
                 if recov == 1:
                     new_loc = Localization(last_x+jump[0][0], last_y+jump[1][0], last_t+1, np.random.poisson(300, 1), 1, r, directions, generate_movie=generate_movie, PSF_FWHM=np.random.normal(PSF_SIGMA, PSF_SIGMA_STD, 1)[0])
 
-                    self.localizations.append(new_loc)
-                    self.bright_localizations.append(new_loc)
+                    if not (new_loc.t % np.round(FRAMERATE/TAU)):
+                        self.localizations.append(new_loc)
+                        self.bright_localizations.append(new_loc)
 
                     self.lifetime -= 1
                 
@@ -125,8 +138,9 @@ class Particle:
                 else:
                     new_loc = Localization(last_x+jump[0][0], last_y+jump[1][0], last_t+1, 0, 0)
 
-                    self.localizations.append(new_loc)
-                    self.dark_localizations.append(new_loc)
+                    if not (new_loc.t % np.round(FRAMERATE/TAU)):
+                        self.localizations.append(new_loc)
+                        self.dark_localizations.append(new_loc)
 
                 self.current_mobility = self.markov_chain.next_state(self.current_mobility)[0]
 
