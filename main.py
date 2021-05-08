@@ -144,23 +144,25 @@ if __name__ == '__main__':
         noise = np.random.poisson(lam=BASE_LEVEL_AD_COUNTS*ELECTRON_PER_AD_COUNT, size=(np.max(t)+1, NO_OF_PIXELS_X, NO_OF_PIXELS_Y))
 
         for i in range(np.max(t)+1):
-            if not i%20:
-                print("Frame " + str(i))
+            if not (i % np.round(FRAMERATE/TAU)):
+                if not i%20:
+                    print("Frame " + str(i))
 
-            frame_x = []
-            frame_y = []
+                frame_x = []
+                frame_y = []
 
-            for l in localizations:
-                if l.t == i:
-                    frame_x.append(l.PSF[0])
-                    frame_y.append(l.PSF[1])
+                for l in localizations:
+                    if l.t == i:
+                        frame_x.append(l.PSF[0])
+                        frame_y.append(l.PSF[1])
 
-            frame_x = [item for sublist in frame_x for item in sublist]
-            frame_y = [item for sublist in frame_y for item in sublist]
+                frame_x = [item for sublist in frame_x for item in sublist]
+                frame_y = [item for sublist in frame_y for item in sublist]
 
-            hist = np.histogram2d(frame_y, frame_x, bins=[NO_OF_PIXELS_X, NO_OF_PIXELS_Y], range=[[0,NO_OF_PIXELS_X*PIXEL_SIZE],[0,NO_OF_PIXELS_Y*PIXEL_SIZE]])
+                hist = np.histogram2d(frame_y, frame_x, bins=[NO_OF_PIXELS_X, NO_OF_PIXELS_Y], range=[[0,NO_OF_PIXELS_X*PIXEL_SIZE],[0,NO_OF_PIXELS_Y*PIXEL_SIZE]])
 
-            movie_array[i] = hist[0]*(QE*EM_GAIN/ELECTRON_PER_AD_COUNT) + noise[i]
+                movie_array[i] = hist[0]*(QE*EM_GAIN/ELECTRON_PER_AD_COUNT) + noise[i]
 
+        movie_array = movie_array[np.arange(0, np.max(t)+1, int(FRAMERATE/TAU))]
         tifffile.imsave('test.tiff', movie_array)
 
