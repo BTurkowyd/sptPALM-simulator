@@ -8,7 +8,7 @@ EM_GAIN = 300
 # Movie settings
 TAU = 0.0001
 FRAMERATE = 0.01
-FRAMES = 3000
+FRAMES = 1000
 LOC_PREC = 1
 
 # Fluorophore settings
@@ -22,7 +22,7 @@ K_REC = 0.999
 # Cell settings
 LENGTH = 4000
 HEIGHT = 1000
-no_of_trajectories = 100
+no_of_trajectories = 20
 no_of_cells = 100
 
 # Dynamics (µm²/s)
@@ -44,4 +44,4 @@ emission_matrix = {
 }
 
 # Save to tiff
-generate_movie = False
+generate_movie = True

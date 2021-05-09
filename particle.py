@@ -34,7 +34,7 @@ class Particle:
         while self.init_bool == False:
             self.init_x = np.random.uniform(0, LENGTH)
             self.init_y = np.random.uniform(0, HEIGHT)
-            self.init_t = np.random.randint(0, FRAMES)
+            self.init_t = np.random.randint(0, int(FRAMES*(FRAMERATE/TAU)))
 
             self.init_x, self.init_y = rotate(cell_origin, [self.init_x, self.init_y], cell_angle)
 
