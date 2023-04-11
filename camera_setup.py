@@ -8,22 +8,23 @@ EM_GAIN = 300
 # Movie settings
 TAU = 0.0001
 FRAMERATE = 0.01
-FRAMES = 1000
+FRAMES = 2000
 LOC_PREC = 1
 
 # Fluorophore settings
 PSF_SIGMA = 200
 PSF_SIGMA_STD = 50
-PHOTONS_PER_EVENT = 200
+PHOTONS_ABSORBED = 1
+QY = 0.56
 K_BLEACH = 0.001
-K_DARK = 0.00001
-K_REC = 0.999
+K_DARK = 0.01
+K_REC = 0.3
 
 # Cell settings
-LENGTH = 4000
-HEIGHT = 1000
+LENGTH = 1800
+HEIGHT = 1800
 no_of_trajectories = 20
-no_of_cells = 100
+no_of_cells = 5
 
 # Dynamics (µm²/s)
 fractions = [0,4]

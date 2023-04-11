@@ -36,13 +36,17 @@ class Particle:
             self.init_y = np.random.uniform(0, HEIGHT)
             self.init_t = np.random.randint(0, int(FRAMES*(FRAMERATE/TAU)))
 
-            self.init_x, self.init_y = rotate(cell_origin, [self.init_x, self.init_y], cell_angle)
+            self.init_x, self.init_y = rotate([self.init_x, self.init_y], cell_angle)
+
+            self.init_x += cell_origin[0]
+            self.init_y += cell_origin[1]
+
 
             self.init_bool = Particle.cell.path.contains_point((self.init_x, self.init_y))
 
-        self.localizations = [Localization(self.init_x + self.cell_origin[0], self.init_y + self.cell_origin[1], self.init_t, np.random.poisson(300, 1), 1, 0, generate_movie=generate_movie)]
+        self.localizations = [Localization(self.init_x + self.cell_origin[0], self.init_y + self.cell_origin[1], self.init_t, drawPhotonsEmitted(PHOTONS_ABSORBED, QY), 1, 0, generate_movie=generate_movie)]
 
-        self.bright_localizations = [Localization(self.init_x + self.cell_origin[0], self.init_y + self.cell_origin[1], self.init_t, np.random.poisson(300, 1), 1, 0, generate_movie=generate_movie)]
+        self.bright_localizations = [Localization(self.init_x + self.cell_origin[0], self.init_y + self.cell_origin[1], self.init_t, drawPhotonsEmitted(PHOTONS_ABSORBED, QY), 1, 0, generate_movie=generate_movie)]
 
         self.dark_localizations = []
         self.id = Particle.ident
@@ -100,11 +104,11 @@ class Particle:
                 
                 # If not...
                 if blinking == 0:
-                    new_loc = Localization(last_x+jump[0][0], last_y+jump[1][0], last_t+1, np.random.poisson(300, 1), 1, r, directions, generate_movie=generate_movie, PSF_FWHM=np.random.normal(PSF_SIGMA, PSF_SIGMA_STD, 1)[0])
+                    new_loc = Localization(last_x+jump[0][0], last_y+jump[1][0], last_t+1, drawPhotonsEmitted(PHOTONS_ABSORBED, QY), 1, r, directions, generate_movie=generate_movie, PSF_FWHM=np.random.normal(PSF_SIGMA, PSF_SIGMA_STD, 1)[0])
 
                     if not (new_loc.t % np.round(FRAMERATE/TAU)):
                         self.localizations.append(new_loc)
-                        self.bright_localizations.append(new_loc)
+                    self.bright_localizations.append(new_loc)
 
                     self.lifetime -= 1
 
@@ -114,7 +118,7 @@ class Particle:
 
                     if not (new_loc.t % np.round(FRAMERATE/TAU)):
                         self.localizations.append(new_loc)
-                        self.dark_localizations.append(new_loc)
+                    self.dark_localizations.append(new_loc)
 
                 self.current_mobility = self.markov_chain.next_state(self.current_mobility)[0]
             
@@ -126,11 +130,11 @@ class Particle:
 
                 # If yes...
                 if recov == 1:
-                    new_loc = Localization(last_x+jump[0][0], last_y+jump[1][0], last_t+1, np.random.poisson(300, 1), 1, r, directions, generate_movie=generate_movie, PSF_FWHM=np.random.normal(PSF_SIGMA, PSF_SIGMA_STD, 1)[0])
+                    new_loc = Localization(last_x+jump[0][0], last_y+jump[1][0], last_t+1, drawPhotonsEmitted(PHOTONS_ABSORBED, QY), 1, r, directions, generate_movie=generate_movie, PSF_FWHM=np.random.normal(PSF_SIGMA, PSF_SIGMA_STD, 1)[0])
 
                     if not (new_loc.t % np.round(FRAMERATE/TAU)):
                         self.localizations.append(new_loc)
-                        self.bright_localizations.append(new_loc)
+                    self.bright_localizations.append(new_loc)
 
                     self.lifetime -= 1
                 
@@ -140,16 +144,18 @@ class Particle:
 
                     if not (new_loc.t % np.round(FRAMERATE/TAU)):
                         self.localizations.append(new_loc)
-                        self.dark_localizations.append(new_loc)
+                    self.dark_localizations.append(new_loc)
 
                 self.current_mobility = self.markov_chain.next_state(self.current_mobility)[0]
 
+        self.groundtruth_trajectory()
+
     def groundtruth_trajectory(self):
         # Generates a dictionary with groundtruth trajectories. Useful to compare with the tracking software result
-        self.groundtruth = pd.DataFrame(columns=['x','y','t','id'])
+        self.groundtruth = pd.DataFrame(columns=['x','y','t','frame','id'])
 
         for b in self.bright_localizations:
-            d = {'x': [np.round(b.x,1)], 'y': [np.round(b.y,1)], 't': [b.t], 'id': [self.id]}
+            d = {'x': [np.round(b.x,1)], 'y': [np.round(b.y,1)], 't': [b.t], 'frame': [b.frame], 'id': [self.id]}
             df = pd.DataFrame(data=d)
             self.groundtruth = self.groundtruth.append(df)
 

@@ -1,3 +1,4 @@
+from camera_setup import FRAMERATE
 from methods import *
 
 class Localization:
@@ -9,6 +10,7 @@ class Localization:
         self.state = state
         self.displacement = displacement
         self.orientation = orientation
+        self.frame = self.t // (FRAMERATE/TAU)
 
         # [self.displacement_x, self.displacement_y] = polarToCartesian(self.displacement, self.orientation)
 

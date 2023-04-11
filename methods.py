@@ -27,12 +27,13 @@ def blink(prob, trial=1):
 def recovery(prob, trial=1):
     return np.random.binomial(trial, prob)
 
-def rotate(origin, point, angle):
-    ox, oy = origin
+
+def rotate(point, angle):
     px, py = point
 
-    qx = ox + np.cos(angle) * (px - ox) - np.sin(angle) * (py - oy)
-    qy = oy + np.sin(angle) * (px - ox) + np.cos(angle) * (py - oy)
+    qx = np.cos(angle) * px - np.sin(angle) * py
+    qy = np.sin(angle) * px + np.cos(angle) * py
+    
     return qx, qy
 
 def gauss2d(intensity, center_x, center_y, PSF_FWHM_X=200, PSF_FWHM_Y=200, orientation = 0):
@@ -43,3 +44,14 @@ def gauss2d(intensity, center_x, center_y, PSF_FWHM_X=200, PSF_FWHM_Y=200, orien
     # for i in range(len(x)):
     #     x[i], y[i] = rotate(mean, [x[i],y[i]], orientation)
     return [x,y]
+
+def drawPhotonsAbsorbed(mean, std = 400):
+    y = np.random.normal(mean, std, 1)
+    if y > 0:
+        return np.int(y)
+    else: return 1
+
+def drawPhotonsEmitted(mean, QY):
+    photons_absorbed = drawPhotonsAbsorbed(mean)
+    y = np.random.binomial(photons_absorbed, QY)
+    return np.int(y) 

@@ -52,7 +52,10 @@ class CellShape:
 
         for i in range(len(self.shape['x'])):
             # Rotate the cell
-            self.shape['x'][i], self.shape['y'][i] = rotate(self.origin, [self.shape['x'][i], self.shape['y'][i]], self.angle)
+            self.shape['x'][i], self.shape['y'][i] = rotate([self.shape['x'][i], self.shape['y'][i]], self.angle)
+
+            self.shape['x'][i] += self.origin[0]
+            self.shape['y'][i] += self.origin[1] 
 
         # Creating a matplotlib Path object. It allows to chack later whether generated localization is within the cell.
         self.polygon = [(x, y) for x, y in zip(self.shape['x'], self.shape['y'])]
