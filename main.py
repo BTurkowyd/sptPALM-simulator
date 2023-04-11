@@ -1,9 +1,9 @@
 from concurrent.futures import process
 import numpy as np
 import pandas as pd
-from cell_multiprocess import *
-from methods import *
-from camera_setup import *
+from modules.cell_multiprocess import *
+from modules.methods import *
+from parameters import *
 import tifffile
 import concurrent.futures
 from multiprocessing import cpu_count, Lock, Process

@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.path as mpltPath
-from methods import *
-from particle import Particle
+from modules.methods import *
+from modules.particle import Particle
 
 class CellShape:
     ident = 1

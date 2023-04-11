@@ -1,8 +1,8 @@
 __pycache__
-cell_backup.py
-cell_v2.py
+.vscode
 *.txt
 *.swft
 *.tiff
 *.csv
 !requirements.txt
+.vscode/settings.json

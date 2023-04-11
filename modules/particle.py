@@ -1,7 +1,7 @@
-from methods import *
-from camera_setup import *
-from localization import Localization
-from markovchain import MarkovChain
+from modules.methods import *
+from parameters import *
+from modules.localization import Localization
+from modules.markovchain import MarkovChain
 import numpy as np
 import pandas as pd
 
