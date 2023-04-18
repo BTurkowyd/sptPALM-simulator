@@ -1,13 +1,10 @@
-from concurrent.futures import process
 import numpy as np
 import pandas as pd
 from modules.cell_multiprocess import *
-from modules.methods import *
-from parameters import *
+from input_parameters import *
 import tifffile
 import concurrent.futures
 from multiprocessing import cpu_count, Lock, Process
-import itertools
 
 CPU_COUNT = cpu_count()
 global_lock = Lock()

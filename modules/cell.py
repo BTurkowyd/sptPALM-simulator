@@ -1,6 +1,5 @@
 import numpy as np
 import matplotlib.path as mpltPath
-from modules.methods import *
 from modules.particle import Particle
 
 class CellShape:
@@ -40,8 +39,8 @@ class CellShape:
         self.circle2 = {'x': [], 'y': []}
 
         for r1, r2 in zip(self.rotations1, self.rotations2):
-            point1 = np.array(polarToCartesian(self.height/2, r1))
-            point2 = np.array(polarToCartesian(self.height/2, r2))
+            point1 = np.array(self.polarToCartesian(self.height/2, r1))
+            point2 = np.array(self.polarToCartesian(self.height/2, r2))
 
             self.circle1['x'].append(self.circle_center1['x'] + point1[0] + np.random.normal())
             self.circle1['y'].append(self.circle_center1['y'] + point1[1] + np.random.normal())
@@ -52,7 +51,7 @@ class CellShape:
 
         for i in range(len(self.shape['x'])):
             # Rotate the cell
-            self.shape['x'][i], self.shape['y'][i] = rotate([self.shape['x'][i], self.shape['y'][i]], self.angle)
+            self.shape['x'][i], self.shape['y'][i] = self.rotate([self.shape['x'][i], self.shape['y'][i]], self.angle)
 
             self.shape['x'][i] += self.origin[0]
             self.shape['y'][i] += self.origin[1] 
@@ -68,4 +67,18 @@ class CellShape:
 
         Particle.cell = self
 
-        self.trajectories = [Particle(i, K_BLEACH, K_DARK, K_REC, self.length, self.height, FRAMES, fractions, self.origin, self.angle, CellShape.generate_movie, self.transition_matrix, self.emission_matrix) for i in lifetime(K_BLEACH, no_of_trajectories)]
+        self.trajectories = [Particle(i, K_BLEACH, K_DARK, K_REC, self.length, self.height, FRAMES, fractions, self.origin, self.angle, CellShape.generate_movie, self.transition_matrix, self.emission_matrix) for i in self.lifetime(K_BLEACH, no_of_trajectories)]
+
+    def lifetime(self, rate, size):
+        return np.random.geometric(rate, size)
+
+    def polarToCartesian(self, displacement, direction):
+        x = displacement*np.cos(direction)
+        y = displacement*np.sin(direction)
+        return([x,y])
+
+    def rotate(self, point, angle):
+        px, py = point
+        qx = np.cos(angle) * px - np.sin(angle) * py
+        qy = np.sin(angle) * px + np.cos(angle) * py
+        return qx, qy
