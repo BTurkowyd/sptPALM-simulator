@@ -1,5 +1,5 @@
 import numpy as np
-from camera_setup import LOC_PREC, TAU
+from modules.camera_setup import LOC_PREC, TAU
 
 def direction(n):
     return np.random.uniform(0, np.pi*2, n)

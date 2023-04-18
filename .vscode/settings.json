@@ -1,3 +1,6 @@
 {
-    "python.pythonPath": "/Users/bartoszturkowyd/.virtualenvs/spt_simul/bin/python"
+    "python.pythonPath": "/Users/bartoszturkowyd/.virtualenvs/spt_simul/bin/python",
+    "python.analysis.extraPaths": [
+        "./modules"
+    ]
 }

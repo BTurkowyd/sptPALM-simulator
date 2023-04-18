@@ -1,5 +1,5 @@
-from cell import CellShape
-from camera_setup import *
+from modules.cell import CellShape
+from modules.camera_setup import *
 import numpy as np
 from multiprocessing import cpu_count, Lock, Process
 

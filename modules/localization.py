@@ -1,5 +1,5 @@
-from camera_setup import FRAMERATE
-from methods import *
+from modules.camera_setup import FRAMERATE
+from modules.methods import *
 
 class Localization:
     def __init__(self, x, y, t, i, state, displacement=0, orientation=0, PSF_FWHM=200, generate_movie=False):
