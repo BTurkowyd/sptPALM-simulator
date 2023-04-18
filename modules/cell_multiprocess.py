@@ -1,11 +1,10 @@
 from modules.cell import CellShape
-from modules.camera_setup import *
+from input_parameters import *
 import numpy as np
-from multiprocessing import cpu_count, Lock, Process
+from multiprocessing import cpu_count, Lock
 
 CPU_COUNT = cpu_count()
 global_lock = Lock()
-
 
 length = np.random.lognormal(np.log(LENGTH), np.log(LENGTH)*0.03, no_of_cells)
 height = np.random.normal(HEIGHT, HEIGHT*0.1, no_of_cells)

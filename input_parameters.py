@@ -8,7 +8,7 @@ EM_GAIN = 300
 # Movie settings
 TAU = 0.0001
 FRAMERATE = 0.01
-FRAMES = 2000
+FRAMES = 100
 LOC_PREC = 1
 
 # Fluorophore settings
@@ -23,7 +23,7 @@ K_REC = 0.3
 # Cell settings
 LENGTH = 1800
 HEIGHT = 1800
-no_of_trajectories = 20
+no_of_trajectories = 5
 no_of_cells = 5
 
 # Dynamics (µm²/s)

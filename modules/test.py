@@ -1,5 +1,4 @@
 import threading
-from time import sleep
 from datetime import datetime
 
 global_lock = threading.Lock()

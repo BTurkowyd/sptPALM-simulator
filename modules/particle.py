@@ -1,5 +1,4 @@
-from modules.methods import *
-from modules.camera_setup import *
+from input_parameters import *
 from modules.localization import Localization
 from modules.markovchain import MarkovChain
 import numpy as np
@@ -36,7 +35,7 @@ class Particle:
             self.init_y = np.random.uniform(0, HEIGHT)
             self.init_t = np.random.randint(0, int(FRAMES*(FRAMERATE/TAU)))
 
-            self.init_x, self.init_y = rotate([self.init_x, self.init_y], cell_angle)
+            self.init_x, self.init_y = self.rotate([self.init_x, self.init_y], cell_angle)
 
             self.init_x += cell_origin[0]
             self.init_y += cell_origin[1]
@@ -44,9 +43,9 @@ class Particle:
 
             self.init_bool = Particle.cell.path.contains_point((self.init_x, self.init_y))
 
-        self.localizations = [Localization(self.init_x + self.cell_origin[0], self.init_y + self.cell_origin[1], self.init_t, drawPhotonsEmitted(PHOTONS_ABSORBED, QY), 1, 0, generate_movie=generate_movie)]
+        self.localizations = [Localization(self.init_x + self.cell_origin[0], self.init_y + self.cell_origin[1], self.init_t, self.drawPhotonsEmitted(PHOTONS_ABSORBED, QY), 1, 0, generate_movie=generate_movie)]
 
-        self.bright_localizations = [Localization(self.init_x + self.cell_origin[0], self.init_y + self.cell_origin[1], self.init_t, drawPhotonsEmitted(PHOTONS_ABSORBED, QY), 1, 0, generate_movie=generate_movie)]
+        self.bright_localizations = [Localization(self.init_x + self.cell_origin[0], self.init_y + self.cell_origin[1], self.init_t, self.drawPhotonsEmitted(PHOTONS_ABSORBED, QY), 1, 0, generate_movie=generate_movie)]
 
         self.dark_localizations = []
         self.id = Particle.ident
@@ -70,9 +69,9 @@ class Particle:
                 last_state = self.localizations[-1].state
 
             if self.current_mobility == 'static':
-                r = displacements(fraction[0])
+                r = self.displacements(fraction[0])
             else:
-                r = displacements(fraction[1])
+                r = self.displacements(fraction[1])
 
             self.inside = False
 
@@ -80,12 +79,12 @@ class Particle:
 
         # Check whether generates localization is within the cell
             while self.inside == False and trial < 300:
-                directions = direction(1)
-                jump = polarToCartesian(r, directions)
+                directions = self.direction(1)
+                jump = self.polarToCartesian(r, directions)
 
                 # Apply loc precision error
-                directions_LP = direction(1)
-                jump_LP = polarToCartesian(np.random.normal(0, LOC_PREC), directions_LP)
+                directions_LP = self.direction(1)
+                jump_LP = self.polarToCartesian(np.random.normal(0, LOC_PREC), directions_LP)
                 jump[0][0] += jump_LP[0][0]
                 jump[1][0] += jump_LP[1][0]
 
@@ -100,11 +99,11 @@ class Particle:
             if last_state == 1:
 
                 # Checks whether localization will go to the "off" state...
-                blinking = blink(K_DARK)
+                blinking = self.blink(K_DARK)
                 
                 # If not...
                 if blinking == 0:
-                    new_loc = Localization(last_x+jump[0][0], last_y+jump[1][0], last_t+1, drawPhotonsEmitted(PHOTONS_ABSORBED, QY), 1, r, directions, generate_movie=generate_movie, PSF_FWHM=np.random.normal(PSF_SIGMA, PSF_SIGMA_STD, 1)[0])
+                    new_loc = Localization(last_x+jump[0][0], last_y+jump[1][0], last_t+1, self.drawPhotonsEmitted(PHOTONS_ABSORBED, QY), 1, r, directions, generate_movie=generate_movie, PSF_FWHM=np.random.normal(PSF_SIGMA, PSF_SIGMA_STD, 1)[0])
 
                     if not (new_loc.t % np.round(FRAMERATE/TAU)):
                         self.localizations.append(new_loc)
@@ -126,11 +125,11 @@ class Particle:
             else:
 
                 # Checks whether localization will go to the "on" state...
-                recov = recovery(K_REC)
+                recov = self.recovery(K_REC)
 
                 # If yes...
                 if recov == 1:
-                    new_loc = Localization(last_x+jump[0][0], last_y+jump[1][0], last_t+1, drawPhotonsEmitted(PHOTONS_ABSORBED, QY), 1, r, directions, generate_movie=generate_movie, PSF_FWHM=np.random.normal(PSF_SIGMA, PSF_SIGMA_STD, 1)[0])
+                    new_loc = Localization(last_x+jump[0][0], last_y+jump[1][0], last_t+1, self.drawPhotonsEmitted(PHOTONS_ABSORBED, QY), 1, r, directions, generate_movie=generate_movie, PSF_FWHM=np.random.normal(PSF_SIGMA, PSF_SIGMA_STD, 1)[0])
 
                     if not (new_loc.t % np.round(FRAMERATE/TAU)):
                         self.localizations.append(new_loc)
@@ -150,6 +149,35 @@ class Particle:
 
         self.groundtruth_trajectory()
 
+    def direction(self, n):
+        return np.random.uniform(0, np.pi*2, n)
+    
+    def dToJD(self, D, loc_prec=LOC_PREC, dt=TAU):
+        y = 2*np.sqrt(D*10**6*dt + loc_prec**2)
+        return y
+
+    def displacements(self, diffusion, lifetime=1):
+        rayleigh_sigma = self.dToJD(diffusion)
+        y = np.random.rayleigh(rayleigh_sigma, lifetime)
+        return y
+    
+    def polarToCartesian(self, displacement, direction):
+        x = displacement*np.cos(direction)
+        y = displacement*np.sin(direction)
+        return([x,y])
+
+    def blink(self, prob, trial=1):
+        return np.random.binomial(trial, prob)
+
+    def recovery(self, prob, trial=1):
+        return np.random.binomial(trial, prob)
+    
+    def rotate(self, point, angle):
+        px, py = point
+        qx = np.cos(angle) * px - np.sin(angle) * py
+        qy = np.sin(angle) * px + np.cos(angle) * py
+        return qx, qy
+
     def groundtruth_trajectory(self):
         # Generates a dictionary with groundtruth trajectories. Useful to compare with the tracking software result
         self.groundtruth = pd.DataFrame(columns=['x','y','t','frame','id'])
@@ -159,4 +187,13 @@ class Particle:
             df = pd.DataFrame(data=d)
             self.groundtruth = self.groundtruth.append(df)
 
+    def drawPhotonsAbsorbed(self, mean, std = 400):
+        y = np.random.normal(mean, std, 1)
+        if y > 0:
+            return np.int(y)
+        else: return 1
 
+    def drawPhotonsEmitted(self, mean, QY):
+        photons_absorbed = self.drawPhotonsAbsorbed(mean)
+        y = np.random.binomial(photons_absorbed, QY)
+        return np.int(y) 
